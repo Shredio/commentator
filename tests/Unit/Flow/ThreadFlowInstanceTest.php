@@ -309,7 +309,7 @@ final class ThreadFlowInstanceTest extends TestCase
 			new DateTimeImmutable('2025-08-13')
 		);
 		
-		$flow = new ThreadFlow($mainPost)
+		$flow = (new ThreadFlow($mainPost))
 			->withNestedPost($nestedPost1)
 			->withNestedPost($nestedPost2)
 			->withNextPost($sameLevelPost1)
@@ -341,7 +341,7 @@ final class ThreadFlowInstanceTest extends TestCase
 			new DateTimeImmutable('2025-08-13')
 		);
 		
-		$flow = new ThreadFlow($mainPost)
+		$flow = (new ThreadFlow($mainPost))
 			->withNestedPost($nestedPost)
 			->withNextPost($nextPost);
 		
@@ -395,7 +395,7 @@ final class ThreadFlowInstanceTest extends TestCase
 			new DateTimeImmutable('2025-08-13')
 		);
 		
-		$flow = new ThreadFlow($mainPost)
+		$flow = (new ThreadFlow($mainPost))
 			->withNestedPost($level1)
 			->withNestedPost($level2)
 			->withNestedPost($level3)

@@ -63,7 +63,7 @@ final readonly class Commentator
 			return null;
 		}
 
-		$targetDate = $this->dateTimeGenerator->generateTargetDate();
+		$targetDate = $this->dateTimeGenerator->getTargetDate();
 		$author = $this->getPostAuthor($input->author);
 		$threadFlowItem = new ThreadFlowItem($content, $author->nickname, $author->gender, $targetDate);
 

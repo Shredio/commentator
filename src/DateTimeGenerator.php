@@ -6,5 +6,8 @@ use DateTimeImmutable;
 
 interface DateTimeGenerator
 {
-    public function generateTargetDate(): DateTimeImmutable;
+	public function getTargetDate(): DateTimeImmutable;
+
+	public function getDate(DateTimeImmutable $referenceDate): DateTimeImmutable;
+
 }

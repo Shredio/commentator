@@ -12,7 +12,12 @@ final readonly class FixedDateTimeGenerator implements DateTimeGenerator
     ) {
     }
 
-    public function generateTargetDate(): DateTimeImmutable
+    public function getTargetDate(): DateTimeImmutable
+    {
+        return $this->fixedDateTime;
+    }
+
+    public function getDate(DateTimeImmutable $referenceDate): DateTimeImmutable
     {
         return $this->fixedDateTime;
     }

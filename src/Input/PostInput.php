@@ -49,4 +49,25 @@ abstract readonly class PostInput
 		return $count;
 	}
 
+	/**
+	 * @return array{DateTimeImmutable, DateTimeImmutable} minimum, maximum
+	 */
+	public function getMinimumAndMaximumDates(): array
+	{
+		$min = $this->createdAt;
+		$max = $this->createdAt;
+
+		foreach ($this->comments as $comment) {
+			[$nestedMin, $nestedMax] = $comment->getMinimumAndMaximumDates();
+			if ($nestedMin < $min) {
+				$min = $nestedMin;
+			}
+			if ($nestedMax > $max) {
+				$max = $nestedMax;
+			}
+		}
+
+		return [$min, $max];
+	}
+
 }

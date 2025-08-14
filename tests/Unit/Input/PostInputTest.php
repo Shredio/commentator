@@ -188,4 +188,78 @@ final class PostInputTest extends TestCase
 		$this->assertSame(5, $itemCount);
 	}
 
+	public function testGetMinimumAndMaximumDatesWithoutComments(): void
+	{
+		$postDate = $this->createDatetime('2025-01-15 10:00:00');
+		$post = $this->createThreadInput('Test content', null, $postDate);
+
+		[$min, $max] = $post->getMinimumAndMaximumDates();
+
+		$this->assertEquals($postDate, $min);
+		$this->assertEquals($postDate, $max);
+	}
+
+	public function testGetMinimumAndMaximumDatesWithOneComment(): void
+	{
+		$postDate = $this->createDatetime('2025-01-15 10:00:00');
+		$commentDate = $this->createDatetime('2025-01-15 11:00:00');
+		
+		$comment = $this->createCommentInput('Comment', null, $commentDate);
+		$post = $this->createThreadInput('Test content', null, $postDate, [$comment]);
+
+		[$min, $max] = $post->getMinimumAndMaximumDates();
+
+		$this->assertEquals($postDate, $min);
+		$this->assertEquals($commentDate, $max);
+	}
+
+	public function testGetMinimumAndMaximumDatesWithCommentBeforePost(): void
+	{
+		$postDate = $this->createDatetime('2025-01-15 10:00:00');
+		$commentDate = $this->createDatetime('2025-01-15 09:00:00');
+		
+		$comment = $this->createCommentInput('Comment', null, $commentDate);
+		$post = $this->createThreadInput('Test content', null, $postDate, [$comment]);
+
+		[$min, $max] = $post->getMinimumAndMaximumDates();
+
+		$this->assertEquals($commentDate, $min);
+		$this->assertEquals($postDate, $max);
+	}
+
+	public function testGetMinimumAndMaximumDatesWithMultipleComments(): void
+	{
+		$postDate = $this->createDatetime('2025-01-15 10:00:00');
+		$earliestDate = $this->createDatetime('2025-01-15 08:00:00');
+		$middleDate = $this->createDatetime('2025-01-15 12:00:00');
+		$latestDate = $this->createDatetime('2025-01-15 14:00:00');
+		
+		$comment1 = $this->createCommentInput('Comment 1', null, $earliestDate);
+		$comment2 = $this->createCommentInput('Comment 2', null, $middleDate);
+		$comment3 = $this->createCommentInput('Comment 3', null, $latestDate);
+		
+		$post = $this->createThreadInput('Test content', null, $postDate, [$comment1, $comment2, $comment3]);
+
+		[$min, $max] = $post->getMinimumAndMaximumDates();
+
+		$this->assertEquals($earliestDate, $min);
+		$this->assertEquals($latestDate, $max);
+	}
+
+	public function testGetMinimumAndMaximumDatesWithNestedComments(): void
+	{
+		$postDate = $this->createDatetime('2025-01-15 10:00:00');
+		$parentCommentDate = $this->createDatetime('2025-01-15 11:00:00');
+		$nestedCommentDate = $this->createDatetime('2025-01-15 09:00:00');
+		
+		$nestedComment = $this->createCommentInput('Nested comment', null, $nestedCommentDate);
+		$parentComment = $this->createCommentInput('Parent comment', null, $parentCommentDate, [$nestedComment]);
+		$post = $this->createThreadInput('Test content', null, $postDate, [$parentComment]);
+
+		[$min, $max] = $post->getMinimumAndMaximumDates();
+
+		$this->assertEquals($nestedCommentDate, $min);
+		$this->assertEquals($parentCommentDate, $max);
+	}
+
 }

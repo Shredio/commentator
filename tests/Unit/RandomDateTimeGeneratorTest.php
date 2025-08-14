@@ -13,28 +13,6 @@ final class RandomDateTimeGeneratorTest extends TestCase
 {
     use ClockSensitiveTrait;
 
-    public function testConstructorValidatesTimezones(): void
-    {
-        $minimum = new DateTimeImmutable('2024-01-01T00:00:00', new DateTimeZone('Europe/Prague'));
-        $maximum = new DateTimeImmutable('2024-01-02T12:00:00', new DateTimeZone('UTC'));
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Minimum date must be in UTC timezone.');
-
-        new RandomDateTimeGenerator($minimum, $maximum);
-    }
-
-    public function testConstructorValidatesMaximumTimezone(): void
-    {
-        $minimum = new DateTimeImmutable('2024-01-01T00:00:00', new DateTimeZone('UTC'));
-        $maximum = new DateTimeImmutable('2024-01-02T12:00:00', new DateTimeZone('Europe/Prague'));
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Maximum date must be in UTC timezone.');
-
-        new RandomDateTimeGenerator($minimum, $maximum);
-    }
-
     public function testConstructorValidatesDateOrder(): void
     {
         $minimum = new DateTimeImmutable('2024-01-02T12:00:00', new DateTimeZone('UTC'));
@@ -130,12 +108,12 @@ final class RandomDateTimeGeneratorTest extends TestCase
     {
         self::mockTime('2024-01-02T13:00:00+00:00');
 
-        $minimum = new DateTimeImmutable('2024-01-01T00:00:00', new DateTimeZone('UTC'));
+        $minimum = new DateTimeImmutable('2024-01-01T01:00:00', new DateTimeZone('UTC'));
         $maximum = new DateTimeImmutable('2024-01-02T12:00:00', new DateTimeZone('UTC'));
         
         $generator = new RandomDateTimeGenerator($minimum, $maximum, 0, 0);
         
-        $referenceDateBeforeTarget = new DateTimeImmutable('2024-01-01T00:30:00', new DateTimeZone('UTC'));
+        $referenceDateBeforeTarget = new DateTimeImmutable('2024-01-01T00:59:59', new DateTimeZone('UTC'));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Reference date cannot be before target date.');
@@ -158,5 +136,23 @@ final class RandomDateTimeGeneratorTest extends TestCase
         $this->expectExceptionMessage('Reference date cannot be after maximum date.');
 
         $generator->getDate($referenceDateAfterMaximum);
+    }
+
+    public function testGeneratorWorksWithDifferentTimezone(): void
+    {
+        self::mockTime('2024-01-02T13:00:00+00:00');
+
+        $minimum = new DateTimeImmutable('2024-01-01T10:00:00+01:00');
+        $maximum = new DateTimeImmutable('2024-01-02T10:00:00+01:00');
+        
+        $generator = new RandomDateTimeGenerator($minimum, $maximum, 0, 0);
+        
+        $targetDate = $generator->getTargetDate();
+        $this->assertEquals('2024-01-01T14:00:00+01:00', $targetDate->format('c'));
+        
+        $referenceDate = new DateTimeImmutable('2024-01-01T12:00:00+01:00');
+        $resultDate = $generator->getDate($referenceDate);
+        
+        $this->assertEquals('2024-01-01T16:00:00+01:00', $resultDate->format('c'));
     }
 }

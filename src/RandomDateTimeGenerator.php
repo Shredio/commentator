@@ -3,9 +3,7 @@
 namespace Shredio\Commentator;
 
 use DateTimeImmutable;
-use DateTimeZone;
 use InvalidArgumentException;
-use Shredio\Commentator\Input\ThreadInput;
 use Symfony\Component\Clock\DatePoint;
 
 final readonly class RandomDateTimeGenerator implements DateTimeGenerator
@@ -23,12 +21,6 @@ final readonly class RandomDateTimeGenerator implements DateTimeGenerator
 		int $randomUpperBound = 10 * 60,
 	)
 	{
-		if ($minimum->getTimezone()->getName() !== 'UTC') {
-			throw new InvalidArgumentException('Minimum date must be in UTC timezone.');
-		}
-		if ($maximum->getTimezone()->getName() !== 'UTC') {
-			throw new InvalidArgumentException('Maximum date must be in UTC timezone.');
-		}
 		if ($minimum > $maximum) {
 			throw new InvalidArgumentException('Minimum date must be less than maximum date.');
 		}
@@ -52,20 +44,21 @@ final readonly class RandomDateTimeGenerator implements DateTimeGenerator
 
 	public function getDate(DateTimeImmutable $referenceDate): DateTimeImmutable
 	{
+		$referenceDate = $referenceDate->setTimestamp($referenceDate->getTimestamp() + $this->secondsToAdd);
+
 		if ($referenceDate < $this->targetDate) {
 			throw new InvalidArgumentException('Reference date cannot be before target date.');
 		}
-		
 		if ($referenceDate > $this->maximum) {
 			throw new InvalidArgumentException('Reference date cannot be after maximum date.');
 		}
 		
-		return $referenceDate->setTimestamp($referenceDate->getTimestamp() + $this->secondsToAdd);
+		return $referenceDate;
 	}
 
 	private function getTime(): int
 	{
-		return (new DatePoint(timezone: new DateTimeZone('UTC')))->getTimestamp();
+		return (new DatePoint())->getTimestamp();
 	}
 
 }

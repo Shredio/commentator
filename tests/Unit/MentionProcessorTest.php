@@ -8,7 +8,7 @@ use Shredio\Commentator\Input\CommentInput;
 use Shredio\Commentator\Input\ThreadInput;
 use Shredio\Commentator\MentionProcessor;
 use Shredio\Commentator\ValueObject\Author;
-use Tests\Common\FixedDateTimeGenerator;
+use Tests\Common\FixedDateTimeGeneratorFactory;
 use Tests\Common\SequentialAuthorAllocator;
 use Tests\TestCase;
 
@@ -34,7 +34,7 @@ final class MentionProcessorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(10)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
     }
 

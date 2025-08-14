@@ -59,7 +59,7 @@ final readonly class CommentatorLocaleAwareFactory implements CommentatorFactory
 		return array_map(fn (array $authorList): array => array_map(
 			fn (array $author): Author => new Author(
 				(string) $author['id'],
-				$author['nickname'], 
+				$author['nickname'],
 				strtolower(($author['gender'] ?? '')) === 'female' ? Gender::Female : Gender::Male,
 			),
 			$authorList,
@@ -84,7 +84,7 @@ final readonly class CommentatorLocaleAwareFactory implements CommentatorFactory
 			$contents,
 			$locale,
 			new RandomAuthorAllocator($authors),
-			new RandomDateTimeGenerator(),
+			new RandomDateTimeGeneratorFactory(),
 			$this->processors,
 			$this->eventDispatcher,
 		);

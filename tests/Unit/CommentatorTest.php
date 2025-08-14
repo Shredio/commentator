@@ -11,7 +11,7 @@ use Shredio\Commentator\Input\PostInput;
 use Shredio\Commentator\Input\ThreadInput;
 use Shredio\Commentator\MentionProcessor;
 use Shredio\Commentator\ValueObject\Author;
-use Tests\Common\FixedDateTimeGenerator;
+use Tests\Common\FixedDateTimeGeneratorFactory;
 use Tests\Common\SequentialAuthorAllocator;
 use Tests\TestCase;
 
@@ -158,7 +158,7 @@ final class CommentatorTest extends TestCase
 			'Test instruction with {locale}',
 			'en',
 			new SequentialAuthorAllocator($this->createAuthors(5)),
-			new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+			new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
 			[new MentionProcessor()],
 		);
 
@@ -226,7 +226,7 @@ final class CommentatorTest extends TestCase
             'Test instruction with {locale}',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $thread = $this->createThreadInput('Original content');
@@ -245,7 +245,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $thread = $this->createThreadInput('');
@@ -262,7 +262,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $thread = $this->createThreadInput('   ');
@@ -279,7 +279,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(10)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $nestedComment = $this->createCommentInput('Nested comment');
@@ -303,7 +303,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $comment1 = $this->createCommentInput('Comment 1', new Author('user1', 'User 1'));
@@ -331,7 +331,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $comments = [];
@@ -354,7 +354,7 @@ final class CommentatorTest extends TestCase
             'Translate to {locale} locale',
             'czech',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00'))
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00'))
         );
 
         $thread = $this->createThreadInput('Test content');
@@ -362,38 +362,6 @@ final class CommentatorTest extends TestCase
 
         $this->assertNotNull($result);
         $this->assertSame('Translated content', $result->content);
-    }
-
-    public function testDateTransformation(): void
-    {
-        $fixedDateTime = new DateTimeImmutable('2025-01-01 15:00:00');
-        $commentator = new Commentator(
-            $this->createAiService('Processed content'),
-            'test-model',
-            'Test instruction',
-            'en',
-            new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator($fixedDateTime)
-        );
-
-        $threadCreatedAt = new DateTimeImmutable('2025-01-01 12:00:00');
-        $commentCreatedAt = new DateTimeImmutable('2025-01-01 14:30:00'); // 2.5 hours later
-        
-        $comment = $this->createCommentInput('Comment', null, $commentCreatedAt);
-        $thread = $this->createThreadInput('Thread', null, $threadCreatedAt, [$comment]);
-
-        $result = $commentator->comment($thread);
-
-        $this->assertNotNull($result);
-        $this->assertCount(1, $result->comments);
-
-        // Thread should use fixed date
-        $this->assertEquals($fixedDateTime, $result->createdAt);
-        
-        // The comment should be created 2.5 hours after the thread's target date
-        $interval = $result->createdAt->diff($result->comments[0]->createdAt);
-        $this->assertSame(2, $interval->h);
-        $this->assertSame(30, $interval->i);
     }
 
     public function testTargetDateGeneration(): void
@@ -405,7 +373,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator($fixedDateTime)
+            new FixedDateTimeGeneratorFactory($fixedDateTime)
         );
 
         $thread = $this->createThreadInput('Test content');
@@ -413,7 +381,7 @@ final class CommentatorTest extends TestCase
 
         $this->assertNotNull($result);
         
-        // Target date should be the fixed date from FixedDateTimeGenerator
+        // Target date should be the fixed date from FixedDateTimeGeneratorFactory
         $this->assertEquals($fixedDateTime, $result->createdAt);
     }
 
@@ -427,7 +395,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$preprocessor]
         );
 
@@ -448,7 +416,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$postprocessor]
         );
 
@@ -469,7 +437,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$authorTracker]
         );
 
@@ -492,7 +460,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$preprocessor, $postprocessor, $authorTracker]
         );
 
@@ -514,7 +482,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$authorTracker]
         );
 
@@ -545,7 +513,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$nullPreprocessor]
         );
 
@@ -565,7 +533,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$nullPostprocessor]
         );
 
@@ -585,7 +553,7 @@ final class CommentatorTest extends TestCase
             'Test instruction',
             'en',
             new SequentialAuthorAllocator($this->createAuthors(5)),
-            new FixedDateTimeGenerator(new DateTimeImmutable('2025-01-01 15:00:00')),
+            new FixedDateTimeGeneratorFactory(new DateTimeImmutable('2025-01-01 15:00:00')),
             [$nullPreprocessor]
         );
 

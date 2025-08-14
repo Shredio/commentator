@@ -38,7 +38,7 @@ final readonly class Commentator
 		private string $instruction,
 		private string $locale,
 		private AuthorAllocator $authorAllocator,
-		private DateTimeGenerator $dateTimeGenerator,
+		private DateTimeGeneratorFactory $dateTimeGeneratorFactory,
 		private array $contentProcessors = [],
 		private ?EventDispatcherInterface $eventDispatcher = null,
 	)
@@ -63,7 +63,9 @@ final readonly class Commentator
 			return null;
 		}
 
-		$targetDate = $this->dateTimeGenerator->getTargetDate();
+		$dateTimeGenerator = $this->dateTimeGeneratorFactory->create($input);
+
+		$targetDate = $dateTimeGenerator->getTargetDate();
 		$author = $this->getPostAuthor($input->author);
 		$threadFlowItem = new ThreadFlowItem($content, $author->nickname, $author->gender, $targetDate);
 
@@ -71,7 +73,7 @@ final readonly class Commentator
 			$content,
 			$author,
 			$targetDate,
-			$this->processComments($input, new ThreadFlow($threadFlowItem), $input, $content, $input->createdAt, $targetDate, $info),
+			$this->processComments($input, new ThreadFlow($threadFlowItem), $input, $content, $dateTimeGenerator, $info),
 		);
 	}
 
@@ -83,8 +85,7 @@ final readonly class Commentator
 		ThreadFlow $threadFlow,
 		PostInput $parent,
 		string $threadContent,
-		DateTimeImmutable $referenceDate,
-		DateTimeImmutable $targetDate,
+		DateTimeGenerator $dateTimeGenerator,
 		?InfoToCapture $info,
 	): array
 	{
@@ -95,8 +96,7 @@ final readonly class Commentator
 				$comment,
 				$threadFlow,
 				$threadContent,
-				$referenceDate,
-				$targetDate,
+				$dateTimeGenerator,
 				$info,
 			);
 
@@ -241,17 +241,6 @@ final readonly class Commentator
 		return $this->authorAllocator->allocate($author);
 	}
 
-	private function getCreatedAt(
-		DateTimeImmutable $createdAt,
-		DateTimeImmutable $referenceDate,
-		DateTimeImmutable $targetDate,
-	): DateTimeImmutable
-	{
-		$interval = $referenceDate->diff($createdAt);
-
-		return $targetDate->add($interval);
-	}
-
 	private function addUsage(Response $response, ?InfoToCapture $info): void
 	{
 		if ($info === null) {
@@ -367,8 +356,7 @@ final readonly class Commentator
 		PostInput $comment,
 		ThreadFlow $threadFlow,
 		string $threadContent,
-		DateTimeImmutable $referenceDate,
-		DateTimeImmutable $targetDate,
+		DateTimeGenerator $dateTimeGenerator,
 		?InfoToCapture $info,
 	): ?array
 	{
@@ -379,14 +367,14 @@ final readonly class Commentator
 			}
 
 			$author = $this->getPostAuthor($comment->author);
-			$createdAt = $this->getCreatedAt($comment->createdAt, $referenceDate, $targetDate);
+			$createdAt = $dateTimeGenerator->getDate($comment->createdAt);
 			$threadFlowItem = $this->createThreadFlowItem($content, $author, $createdAt);
 
 			$commentOutput = new CommentOutput(
 				$content,
 				$author,
 				$createdAt,
-				$this->processComments($thread, $threadFlow->withNestedPost($threadFlowItem), $comment, $threadContent, $referenceDate, $targetDate, $info),
+				$this->processComments($thread, $threadFlow->withNestedPost($threadFlowItem), $comment, $threadContent, $dateTimeGenerator, $info),
 			);
 
 			return [

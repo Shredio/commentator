@@ -1,0 +1,6 @@
+@testuser (M) [2025-01-15]: Main post content
+├── @commenter (M) [2025-01-15]: First comment
+│   └── @commenter (M) [2025-01-15]: Reply to first
+│       └── @commenter (M) [2025-01-15]: Deep reply
+└── @commenter (M) [2025-01-15]: Second comment
+    └── @commenter (M) [2025-01-15]: Reply to second

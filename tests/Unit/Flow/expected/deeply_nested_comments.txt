@@ -1,0 +1,4 @@
+@testuser (M) [2025-01-15]: Main post content
+└── @commenter (M) [2025-01-15]: Level 1 comment
+    └── @commenter (M) [2025-01-15]: Level 2 comment
+        └── @commenter (M) [2025-01-15]: Level 3 comment

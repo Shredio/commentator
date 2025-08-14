@@ -1,0 +1,4 @@
+@testuser (M) [2025-01-15]: Hello Investors! This is my main post.
+├── @commenter (M) [2025-01-15]: What do you think about this?
+│   └── @commenter (M) [2025-01-15]: Thanks for clarifying!
+└── @commenter (M) [2025-01-15]: Interesting perspective.

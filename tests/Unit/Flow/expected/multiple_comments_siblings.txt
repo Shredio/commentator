@@ -1,0 +1,4 @@
+@testuser (M) [2025-01-15]: Main post
+├── @commenter (M) [2025-01-15]: First comment
+├── @commenter (M) [2025-01-15]: Second comment
+└── @commenter (M) [2025-01-15]: Third comment

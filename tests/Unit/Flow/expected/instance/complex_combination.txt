@@ -1,0 +1,6 @@
+@Marcel (M) [2025-08-13]: Main post content
+└── @Pepa (M) [2025-08-13]: First nested
+    └── @Jana (F) [2025-08-13]: Second nested
+        ├── @Karel (M) [2025-08-13]: First same level
+        ├── @Alena (F) [2025-08-13]: Second same level
+        └── **Current content of post you must translate**
